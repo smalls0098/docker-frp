@@ -1,0 +1,60 @@
+version: '3'
+
+networks:
+  smnetwork:
+    ipam:
+      config:
+        - subnet: 172.19.0.0/16
+          gateway: 172.19.0.1
+
+
+services:
+  nginx:
+    # 容器名
+    container_name: nginx
+    # 镜像
+    image: nginx:latest
+    # 重启策略
+    restart: always
+    # 设置网络
+    networks:
+      smnetwork:
+        ipv4_address: 172.19.0.2
+    # 文件夹卷映射
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/cert:/etc/nginx/cert:ro
+    # 环境变量
+    environment:
+      # 设置环境变量 时区上海 编码UTF-8
+      TZ: Asia/Shanghai
+      LANG: zh_CN.UTF-8
+    # 端口映射
+    ports:
+      - "822:822"
+      - "80:80"
+      - "443:443"
+  frps:
+    # 容器名
+    container_name: frps
+    # 镜像 客户端也要用一样的
+    image: snowdreamtech/frps:0.38.0
+    # 重启策略
+    restart: always
+    # 设置网络
+    networks:
+      smnetwork:
+        ipv4_address: 172.19.0.3
+    # 文件夹卷映射
+    volumes:
+      - ./frps.ini:/etc/frp/frps.ini:ro
+      - ./page:/page:ro
+    # 环境变量
+    environment:
+      # 设置环境变量 时区上海 编码UTF-8
+      TZ: Asia/Shanghai
+      LANG: zh_CN.UTF-8
+    # 端口映射
+    ports:
+      - "7000:7000"
+      - "7001:7001"
